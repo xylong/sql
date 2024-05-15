@@ -27,6 +27,7 @@ type User struct {
 	UpdatedAt            *time.Time     `gorm:"column:updated_at;type:timestamp;comment:更新时间" json:"updated_at"`                                       // 更新时间
 	DeletedAt            gorm.DeletedAt `gorm:"column:deleted_at;type:timestamp;comment:删除时间" json:"deleted_at"`                                       // 删除时间
 	Address              []Address      `gorm:"foreignKey:UserID;references:ID" json:"address"`
+	Profile              UserProfile    `gorm:"foreignKey:UserID;references:ID" json:"profile"`
 }
 
 // TableName User's table name

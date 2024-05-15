@@ -45,6 +45,11 @@ func newAddress(db *gorm.DB, opts ...gen.DOOption) address {
 		}{
 			RelationField: field.NewRelation("User.Address", "model.Address"),
 		},
+		Profile: struct {
+			field.RelationField
+		}{
+			RelationField: field.NewRelation("User.Profile", "model.UserProfile"),
+		},
 	}
 
 	_address.fillFieldMap()
@@ -136,6 +141,9 @@ type addressBelongsToUser struct {
 	field.RelationField
 
 	Address struct {
+		field.RelationField
+	}
+	Profile struct {
 		field.RelationField
 	}
 }

@@ -87,17 +87,21 @@ func main() {
 	// 创建模型的结构体,生成文件在 model 目录; 先创建的结果会被后面创建的覆盖
 	// 这里创建个别模型仅仅是为了拿到`*generate.QueryStructMeta`类型对象用于后面的模型关联操作中
 	Address := g.GenerateModel("address")
+	Profile := g.GenerateModel("user_profile")
 
 	// 创建有关联关系的模型文件
 	User := g.GenerateModel("user",
 		append(
 			fieldOpts,
 			// user 一对多 address 关联, 外键`user_id`在 address 表中
-			gen.FieldRelate(field.HasMany, "Address", Address, &field.RelateConfig{
-				GORMTag: field.GormTag{
-					"foreignKey": []string{"UserID"},
-					"references": []string{"ID"},
-				}}),
+			gen.FieldRelate(field.HasMany, "Address", Address, &field.RelateConfig{GORMTag: field.GormTag{
+				"foreignKey": []string{"UserID"},
+				"references": []string{"ID"},
+			}}),
+			gen.FieldRelate(field.HasOne, "Profile", Profile, &field.RelateConfig{GORMTag: field.GormTag{
+				"foreignKey": []string{"UserID"},
+				"references": []string{"ID"},
+			}}),
 		)...,
 	)
 	Address = g.GenerateModel("address",
