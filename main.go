@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"gorm.io/gorm/schema"
 	"log"
 	"sql/dao"
 	"sql/model"
@@ -20,14 +23,23 @@ func main() {
 		ctx = context.Background()
 	)
 
-	db, err = gorm.Open(mysql.Open(dsn))
+	db, err = gorm.Open(mysql.New(mysql.Config{
+		DSN:               dsn,
+		DefaultStringSize: 191,
+	}), &gorm.Config{
+		Logger:                 logger.Default.LogMode(logger.Info),
+		SkipDefaultTransaction: true,
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true,
+		}})
 	if err != nil {
 		panic(fmt.Errorf("cannot establish db connection: %w", err))
 	}
 
 	dao.SetDefault(db)
 
-	create(ctx, dao.Q)
+	//create(ctx, dao.Q)
+	find(ctx, dao.Q)
 }
 
 func create(ctx context.Context, query *dao.Query) {
@@ -68,4 +80,20 @@ func create(ctx context.Context, query *dao.Query) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+}
+
+func find(ctx context.Context, query *dao.Query) {
+	address := query.Address
+
+	user, err := query.WithContext(ctx).User.
+		Preload(query.User.Profile).
+		Preload(query.User.Address.Select(address.UserID, address.Province, address.City, address.County, address.Address)).
+		Where(query.User.Name.Eq("summer")).
+		First()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	bytes, _ := json.Marshal(&user)
+	fmt.Println(string(bytes))
 }
