@@ -72,17 +72,45 @@ func main() {
 	// 将非默认字段名的字段定义为自动时间戳和软删除字段;
 	// 自动时间戳默认字段名为:`updated_at`、`created_at, 表字段数据类型为: INT 或 DATETIME
 	// 软删除默认字段名为:`deleted_at`, 表字段数据类型为: DATETIME
-	autoUpdateTimeField := gen.FieldGORMTag("updated_at", func(tag field.GormTag) field.GormTag {
-		return tag.Append("updated_at")
+	autoUpdateTimeField := gen.FieldGORMTag("updatedAt", func(tag field.GormTag) field.GormTag {
+		return tag.Append("autoUpdateTime")
 	})
-	autoCreateTimeField := gen.FieldGORMTag("created_at", func(tag field.GormTag) field.GormTag {
-		return tag.Append("created_at")
+	autoCreateTimeField := gen.FieldGORMTag("createdAt", func(tag field.GormTag) field.GormTag {
+		return tag.Append("autoCreateTime")
 	})
 	softDeleteField := gen.FieldType("deleted_at", "gorm.DeletedAt")
 
 	// 模型自定义选项组
 	fieldOpts := []gen.ModelOpt{jsonField, autoUpdateTimeField, autoCreateTimeField, softDeleteField}
 	allModel := g.GenerateAllTable(fieldOpts...)
+
+	// 创建模型的结构体,生成文件在 model 目录; 先创建的结果会被后面创建的覆盖
+	// 这里创建个别模型仅仅是为了拿到`*generate.QueryStructMeta`类型对象用于后面的模型关联操作中
+	Address := g.GenerateModel("address")
+
+	// 创建有关联关系的模型文件
+	User := g.GenerateModel("user",
+		append(
+			fieldOpts,
+			// user 一对多 address 关联, 外键`user_id`在 address 表中
+			gen.FieldRelate(field.HasMany, "Address", Address, &field.RelateConfig{
+				GORMTag: field.GormTag{
+					"foreignKey": []string{"UserID"},
+					"references": []string{"ID"},
+				}}),
+		)...,
+	)
+	Address = g.GenerateModel("address",
+		append(
+			fieldOpts,
+			gen.FieldRelate(field.BelongsTo, "User", User, &field.RelateConfig{GORMTag: field.GormTag{
+				"foreignKey": []string{"UserID"},
+				"references": []string{"ID"},
+			}}),
+		)...,
+	)
+
+	g.ApplyBasic(User, Address)
 	g.ApplyBasic(allModel...)
 
 	g.Execute()

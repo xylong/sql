@@ -36,12 +36,19 @@ func create(ctx context.Context, query *dao.Query) {
 			Email:    "summer@gmail.com",
 			Name:     "summer",
 			Nickname: "夏天",
+			Address: []model.Address{
+				{Province: "", City: "上海", Address: "汤臣一品"},
+				{Province: "", City: "北京", County: "朝阳区", Address: "朝阳区"},
+			},
 		},
 		{
 			Phone:    "13432584785",
 			Email:    "13432584785@qq.com",
 			Name:     "虾仁",
 			Nickname: "虾仁猪心",
+			Address: []model.Address{
+				{Province: "四川省", City: "成都市", County: "高新区", Address: "金融城"},
+			},
 		},
 	}
 

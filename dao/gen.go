@@ -17,12 +17,14 @@ import (
 
 var (
 	Q           = new(Query)
+	Address     *address
 	User        *user
 	UserProfile *userProfile
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
+	Address = &Q.Address
 	User = &Q.User
 	UserProfile = &Q.UserProfile
 }
@@ -30,6 +32,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
 		db:          db,
+		Address:     newAddress(db, opts...),
 		User:        newUser(db, opts...),
 		UserProfile: newUserProfile(db, opts...),
 	}
@@ -38,6 +41,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 type Query struct {
 	db *gorm.DB
 
+	Address     address
 	User        user
 	UserProfile userProfile
 }
@@ -47,6 +51,7 @@ func (q *Query) Available() bool { return q.db != nil }
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
 		db:          db,
+		Address:     q.Address.clone(db),
 		User:        q.User.clone(db),
 		UserProfile: q.UserProfile.clone(db),
 	}
@@ -63,18 +68,21 @@ func (q *Query) WriteDB() *Query {
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
 		db:          db,
+		Address:     q.Address.replaceDB(db),
 		User:        q.User.replaceDB(db),
 		UserProfile: q.UserProfile.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
+	Address     IAddressDo
 	User        IUserDo
 	UserProfile IUserProfileDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
+		Address:     q.Address.WithContext(ctx),
 		User:        q.User.WithContext(ctx),
 		UserProfile: q.UserProfile.WithContext(ctx),
 	}

@@ -39,6 +39,11 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 	_user.CreatedAt = field.NewTime(tableName, "created_at")
 	_user.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_user.DeletedAt = field.NewField(tableName, "deleted_at")
+	_user.Address = userHasManyAddress{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Address", "model.Address"),
+	}
 
 	_user.fillFieldMap()
 
@@ -61,6 +66,7 @@ type user struct {
 	CreatedAt            field.Time   // 创建时间
 	UpdatedAt            field.Time   // 更新时间
 	DeletedAt            field.Field  // 删除时间
+	Address              userHasManyAddress
 
 	fieldMap map[string]field.Expr
 }
@@ -105,7 +111,7 @@ func (u *user) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (u *user) fillFieldMap() {
-	u.fieldMap = make(map[string]field.Expr, 12)
+	u.fieldMap = make(map[string]field.Expr, 13)
 	u.fieldMap["id"] = u.ID
 	u.fieldMap["phone"] = u.Phone
 	u.fieldMap["email"] = u.Email
@@ -118,6 +124,7 @@ func (u *user) fillFieldMap() {
 	u.fieldMap["created_at"] = u.CreatedAt
 	u.fieldMap["updated_at"] = u.UpdatedAt
 	u.fieldMap["deleted_at"] = u.DeletedAt
+
 }
 
 func (u user) clone(db *gorm.DB) user {
@@ -128,6 +135,77 @@ func (u user) clone(db *gorm.DB) user {
 func (u user) replaceDB(db *gorm.DB) user {
 	u.userDo.ReplaceDB(db)
 	return u
+}
+
+type userHasManyAddress struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a userHasManyAddress) Where(conds ...field.Expr) *userHasManyAddress {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a userHasManyAddress) WithContext(ctx context.Context) *userHasManyAddress {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a userHasManyAddress) Session(session *gorm.Session) *userHasManyAddress {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a userHasManyAddress) Model(m *model.User) *userHasManyAddressTx {
+	return &userHasManyAddressTx{a.db.Model(m).Association(a.Name())}
+}
+
+type userHasManyAddressTx struct{ tx *gorm.Association }
+
+func (a userHasManyAddressTx) Find() (result []*model.Address, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a userHasManyAddressTx) Append(values ...*model.Address) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a userHasManyAddressTx) Replace(values ...*model.Address) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a userHasManyAddressTx) Delete(values ...*model.Address) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a userHasManyAddressTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a userHasManyAddressTx) Count() int64 {
+	return a.tx.Count()
 }
 
 type userDo struct{ gen.DO }

@@ -20,8 +20,8 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 -- Table structure for user_profiles
 -- ----------------------------
-DROP TABLE IF EXISTS `user_profiles`;
-CREATE TABLE `user_profiles` (
+DROP TABLE IF EXISTS `user_profile`;
+CREATE TABLE `user_profile` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `user_id` int unsigned NOT NULL DEFAULT '0' COMMENT '用户id',
   `gender` tinyint(1) NOT NULL COMMENT '性别：0保密 1 男 2女 3未知',
@@ -40,8 +40,8 @@ CREATE TABLE `user_profiles` (
 -- ----------------------------
 -- Table structure for users
 -- ----------------------------
-DROP TABLE IF EXISTS `users`;
-CREATE TABLE `users` (
+DROP TABLE IF EXISTS `user`;
+CREATE TABLE `user` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '?',
   `phone` char(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '手机号',
   `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '邮箱',
