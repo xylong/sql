@@ -87,8 +87,8 @@ func find(ctx context.Context, query *dao.Query) {
 
 	user, err := query.WithContext(ctx).User.
 		Preload(query.User.Profile).
-		Preload(query.User.Address.Select(address.UserID, address.Province, address.City, address.County, address.Address)).
-		Where(query.User.Name.Eq("summer")).
+		Preload(query.User.Address.On(address.City.Eq("上海")).Select(address.ID, address.UserID, address.Province, address.City, address.County, address.Address)).
+		Where(query.User.Name.Like("%s%")).
 		First()
 	if err != nil {
 		log.Fatalln(err)
