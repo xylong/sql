@@ -39,7 +39,8 @@ func main() {
 	dao.SetDefault(db)
 
 	//create(ctx, dao.Q)
-	find(ctx, dao.Q)
+	//find(ctx, dao.Q)
+	update(ctx, dao.Q)
 }
 
 func create(ctx context.Context, query *dao.Query) {
@@ -96,4 +97,17 @@ func find(ctx context.Context, query *dao.Query) {
 
 	bytes, _ := json.Marshal(&user)
 	fmt.Println(string(bytes))
+}
+
+func update(ctx context.Context, query *dao.Query) {
+	info, err := query.User.WithContext(ctx).Where(query.User.ID.Eq(1)).Updates(map[string]interface{}{
+		"phone": "19999999999",
+		"email": "summer@163.com",
+	})
+	if err != nil {
+		fmt.Printf("update user fail, err:%v\n", err)
+		return
+	}
+
+	fmt.Printf("RowsAffected:%v\n", info.RowsAffected)
 }
