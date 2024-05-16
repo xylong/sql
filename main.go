@@ -40,7 +40,8 @@ func main() {
 
 	//create(ctx, dao.Q)
 	//find(ctx, dao.Q)
-	update(ctx, dao.Q)
+	//update(ctx, dao.Q)
+	delete(ctx, dao.Q)
 }
 
 func create(ctx context.Context, query *dao.Query) {
@@ -109,5 +110,14 @@ func update(ctx context.Context, query *dao.Query) {
 		return
 	}
 
+	fmt.Printf("RowsAffected:%v\n", info.RowsAffected)
+}
+
+func delete(ctx context.Context, query *dao.Query) {
+	info, err := query.User.WithContext(ctx).Where(query.User.ID.Eq(2)).Delete()
+	if err != nil {
+		fmt.Printf("delete user fail, err:%v\n", err)
+		return
+	}
 	fmt.Printf("RowsAffected:%v\n", info.RowsAffected)
 }
