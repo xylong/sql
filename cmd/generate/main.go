@@ -10,7 +10,6 @@ import (
 )
 
 //const dsn = "root:easy-chat@(127.0.0.1:3306)/k1?charset=utf8mb4&parseTime=True&loc=Local"
-
 // const dsn = "host=192.168.6.218 user=postgresql password=bingtangMySQL dbname=k1-dev port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 const dsn = "host=192.168.6.218 user=postgresql password=bingtangMySQL dbname=k1-dev port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 
