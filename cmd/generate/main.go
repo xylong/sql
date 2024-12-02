@@ -2,17 +2,20 @@ package main
 
 import (
 	"fmt"
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gen"
 	"gorm.io/gen/field"
 	"gorm.io/gorm"
 	"strings"
 )
 
-const dsn = "root:123456@(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+//const dsn = "root:easy-chat@(127.0.0.1:3306)/k1?charset=utf8mb4&parseTime=True&loc=Local"
+
+// const dsn = "host=192.168.6.218 user=postgresql password=bingtangMySQL dbname=k1-dev port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+const dsn = "host=192.168.6.218 user=postgresql password=bingtangMySQL dbname=k1-dev port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 
 func main() {
-	db, err := gorm.Open(mysql.Open(dsn))
+	db, err := gorm.Open(postgres.Open(dsn))
 	if err != nil {
 		panic(fmt.Errorf("cannot establish db connection: %w", err))
 	}
@@ -82,40 +85,40 @@ func main() {
 
 	// 模型自定义选项组
 	fieldOpts := []gen.ModelOpt{jsonField, autoUpdateTimeField, autoCreateTimeField, softDeleteField}
-	allModel := g.GenerateAllTable(fieldOpts...)
-
+	//allModel := g.GenerateAllTable(fieldOpts...)
+	a := g.GenerateModel("user_levels", fieldOpts...)
 	// 创建模型的结构体,生成文件在 model 目录; 先创建的结果会被后面创建的覆盖
 	// 这里创建个别模型仅仅是为了拿到`*generate.QueryStructMeta`类型对象用于后面的模型关联操作中
-	Address := g.GenerateModel("address")
-	Profile := g.GenerateModel("user_profile")
+	//Address := g.GenerateModel("address")
+	//Profile := g.GenerateModel("user_profile")
 
 	// 创建有关联关系的模型文件
-	User := g.GenerateModel("user",
-		append(
-			fieldOpts,
-			// user 一对多 address 关联, 外键`user_id`在 address 表中
-			gen.FieldRelate(field.HasMany, "Address", Address, &field.RelateConfig{GORMTag: field.GormTag{
-				"foreignKey": []string{"UserID"},
-				"references": []string{"ID"},
-			}}),
-			gen.FieldRelate(field.HasOne, "Profile", Profile, &field.RelateConfig{GORMTag: field.GormTag{
-				"foreignKey": []string{"UserID"},
-				"references": []string{"ID"},
-			}}),
-		)...,
-	)
-	Address = g.GenerateModel("address",
-		append(
-			fieldOpts,
-			gen.FieldRelate(field.BelongsTo, "User", User, &field.RelateConfig{GORMTag: field.GormTag{
-				"foreignKey": []string{"UserID"},
-				"references": []string{"ID"},
-			}}),
-		)...,
-	)
-
-	g.ApplyBasic(User, Address)
-	g.ApplyBasic(allModel...)
+	//User := g.GenerateModel("user",
+	//	append(
+	//		fieldOpts,
+	//		// user 一对多 address 关联, 外键`user_id`在 address 表中
+	//		gen.FieldRelate(field.HasMany, "Address", Address, &field.RelateConfig{GORMTag: field.GormTag{
+	//			"foreignKey": []string{"UserID"},
+	//			"references": []string{"ID"},
+	//		}}),
+	//		gen.FieldRelate(field.HasOne, "Profile", Profile, &field.RelateConfig{GORMTag: field.GormTag{
+	//			"foreignKey": []string{"UserID"},
+	//			"references": []string{"ID"},
+	//		}}),
+	//	)...,
+	//)
+	//Address = g.GenerateModel("address",
+	//	append(
+	//		fieldOpts,
+	//		gen.FieldRelate(field.BelongsTo, "User", User, &field.RelateConfig{GORMTag: field.GormTag{
+	//			"foreignKey": []string{"UserID"},
+	//			"references": []string{"ID"},
+	//		}}),
+	//	)...,
+	//)
+	//
+	g.ApplyBasic(a)
+	//g.ApplyBasic(allModel...)
 
 	g.Execute()
 }
