@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-//const dsn = "root:easy-chat@(127.0.0.1:3306)/k1?charset=utf8mb4&parseTime=True&loc=Local"
+// const dsn = "root:easy-chat@(127.0.0.1:3306)/k1?charset=utf8mb4&parseTime=True&loc=Local"
 // const dsn = "host=192.168.6.218 user=postgresql password=bingtangMySQL dbname=k1-dev port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 const dsn = "host=192.168.6.218 user=postgresql password=bingtangMySQL dbname=k1-dev port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 
@@ -40,7 +40,7 @@ func main() {
 		FieldSignable: false,
 
 		// 生成 gorm 标签的字段索引属性
-		FieldWithIndexTag: false,
+		FieldWithIndexTag: true,
 
 		// 生成 gorm 标签的字段类型属性
 		FieldWithTypeTag: true,
@@ -85,7 +85,7 @@ func main() {
 	// 模型自定义选项组
 	fieldOpts := []gen.ModelOpt{jsonField, autoUpdateTimeField, autoCreateTimeField, softDeleteField}
 	//allModel := g.GenerateAllTable(fieldOpts...)
-	a := g.GenerateModel("user_levels", fieldOpts...)
+	a := g.GenerateModel("users", fieldOpts...)
 	// 创建模型的结构体,生成文件在 model 目录; 先创建的结果会被后面创建的覆盖
 	// 这里创建个别模型仅仅是为了拿到`*generate.QueryStructMeta`类型对象用于后面的模型关联操作中
 	//Address := g.GenerateModel("address")
